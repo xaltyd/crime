@@ -1,0 +1,183 @@
+# Connecticut Court Docket Scraper - Modified Charges Fix Session Summary
+## Date: June 11, 2025
+
+## Problem Summary
+The conviction_modified_charges SQL table was completely empty despite the parser successfully finding modified charges (e.g., 2 charges for test case K10K-CR17-0338221-S).
+
+## Root Cause Identified
+1. **Primary Issue**: The code was passing a docket_id (string like "K10K-CR17-0338221-S") to store_conviction_modified_charges, but the SQL table expected case_id (an INTEGER foreign key referencing conviction.id)
+2. **Secondary Issue**: Only 3 fields were being extracted from modified charges when all fields were available
+
+## Solution Implemented
+
+### Part 1: Fix the case_id lookup (COMPLETED)
+In docket.py, around line 560 in the conviction processing section:
+
+```python
+# Extract and store modified charges if present
+if 'modified_charges' in conviction_record and conviction_record['modified_charges']:
+    modified_charges = conviction_record['modified_charges']
+    
+    # Get the docket NUMBER (not ID) from case_details
+    docket_no = None
+    if 'docket' in conviction_record['case_details']:
+        docket_no = conviction_record['case_details']['docket'].get('docket_number')
+    elif 'cphBody_lblDocketNo' in conviction_record['case_details']:
+        docket_no = conviction_record['case_details']['cphBody_lblDocketNo']
+    
+    if docket_no:
+        # Get the actual case_id from the database
+        judicial.conviction_storage.cursor.execute(
+            'SELECT id FROM conviction WHERE docket_no = ?', 
+            (docket_no,)
+        )
+        result = judicial.conviction_storage.cursor.fetchone()
+        
+        if result:
+            case_id = result[0]  # This is the INTEGER id we need
+            print(f"\nStoring {len(modified_charges)} modified charges for {docket_no} (case_id: {case_id})")
+            judicial.conviction_storage.store_conviction_modified_charges(case_id, modified_charges)
+            modified_charges_count += len(modified_charges)
+        else:
+            log_issue(f'Could not find case_id for docket {docket_no}')
+    else:
+        log_issue(f'No docket number found for conviction with modified charges')
+```
+
+### Part 2: Extract all fields from modified charges (TO BE DONE)
+
+In docket.py, around line 300 in Record.get(), update the extraction:
+
+```python
+# Extract modified charges for separate storage with ALL fields
+modified_charges = []
+if parsed_data and isinstance(parsed_data, dict) and 'sentences' in parsed_data:
+    sentences_data = parsed_data.get('sentences', {})
+    if isinstance(sentences_data, dict) and 'modified' in sentences_data:
+        # Extract ALL fields from the modified sentence data
+        for mod in sentences_data['modified']:
+            modified_charges.append({
+                'statute': mod.get('statute', ''),
+                'description': mod.get('description', ''),
+                'class': mod.get('class', ''),
+                'type': mod.get('type', ''),
+                'occurrence': mod.get('occurrence', ''),
+                'offense_date': mod.get('offense_date', ''),
+                'plea': mod.get('plea', ''),
+                'verdict_finding': mod.get('verdict_finding', ''),
+                'verdict_date': mod.get('verdict_date', ''),
+                'fine': mod.get('fine', ''),
+                'fees': mod.get('fees', '')
+            })
+```
+
+### Part 3: Update SQL table schema (TO BE DONE)
+
+In conviction_storage.py, update the table to include all fields:
+
+```python
+self.cursor.execute('''
+    CREATE TABLE IF NOT EXISTS conviction_modified_charges (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_id INTEGER,
+        statute TEXT,
+        description TEXT,
+        class TEXT,
+        type TEXT,
+        occurrence TEXT,
+        offense_date TEXT,
+        plea TEXT,
+        verdict_finding TEXT,
+        verdict_date TEXT,
+        fine TEXT,
+        fees TEXT,
+        FOREIGN KEY (case_id) REFERENCES conviction(id)
+    )
+''')
+```
+
+### Part 4: Update the storage method (TO BE DONE)
+
+In conviction_storage.py, update store_conviction_modified_charges:
+
+```python
+def store_conviction_modified_charges(self, case_id, modified_charges):
+    """
+    Store modified charges from parsed conviction data.
+    
+    Args:
+        case_id: The integer case_id from conviction table
+        modified_charges: List of dictionaries containing parsed charge data
+    """
+    if not modified_charges:
+        print(f"No modified charges to store for case {case_id}")
+        return
+    
+    stored_count = 0
+    
+    print(f"\nDEBUG: store_conviction_modified_charges called for case_id {case_id}")
+    print(f"DEBUG: Attempting to store {len(modified_charges)} charges")
+    
+    for i, charge in enumerate(modified_charges, 1):
+        try:
+            # Debug output for each charge
+            print(f"DEBUG: Charge {i}: {charge.get('statute')} - {charge.get('description')} - {charge.get('verdict_finding')}")
+            
+            # Insert into database with ALL fields
+            self.cursor.execute('''
+                INSERT INTO conviction_modified_charges 
+                (case_id, statute, description, class, type, occurrence, 
+                 offense_date, plea, verdict_finding, verdict_date, fine, fees)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                case_id,
+                charge.get('statute', ''),
+                charge.get('description', ''),
+                charge.get('class', ''),
+                charge.get('type', ''),
+                charge.get('occurrence', ''),
+                charge.get('offense_date', ''),
+                charge.get('plea', ''),
+                charge.get('verdict_finding', ''),
+                charge.get('verdict_date', ''),
+                charge.get('fine', ''),
+                charge.get('fees', '')
+            ))
+            
+            stored_count += 1
+            print(f"DEBUG: Successfully inserted charge {i}")
+            
+        except Exception as e:
+            print(f"ERROR storing modified charge {i} for case {case_id}: {e}")
+            print(f"Charge data: {charge}")
+            continue
+    
+    # Commit the transaction
+    try:
+        self.conn.commit()
+        print(f"DEBUG: Transaction committed. Successfully stored {stored_count} modified charges for case {case_id}")
+    except Exception as e:
+        print(f"ERROR committing modified charges for case {case_id}: {e}")
+        self.conn.rollback()
+        raise
+```
+
+## Current Status
+- ✅ Modified charges are now being stored in the database (2 charges showing for K10K-CR17-0338221-S)
+- ⚠️ Only 3 fields are populated (statute, description, verdict_finding)
+- ⚠️ Other fields (plea, verdict_date, class, type, etc.) need to be extracted and stored
+
+## Next Steps
+1. Implement Parts 2-4 above to extract and store all fields
+2. You may need to drop and recreate the conviction_modified_charges table to add the new columns
+3. Test with K10K-CR17-0338221-S to verify all fields are populated
+
+## Key Files
+- **docket.py**: Main scraper, needs field extraction updates
+- **conviction_storage.py**: Database storage, needs schema and method updates
+- **record_parser.py**: Parser that extracts the data (already working correctly)
+
+## Test Case
+Docket K10K-CR17-0338221-S should show:
+- 53a-116 - Criminal Mischief 2nd Deg - with full details
+- 53a-125a - Larceny 5Th Deg - with full details
