@@ -1,1 +1,26 @@
-# crime
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/analyze_docket_pending.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/checkpoint.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/color_print.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/conviction_sql.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/conviction_storage - Copy.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/conviction_storage.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/date_utils.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/distributed_scraper.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/doc-portal.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/docket.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/docket_sql.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/explore_data.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/jud_sql.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/list-py.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/llm_interface.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/log.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/migrate_database.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/pending_sql.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/query_generator.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/record_parser.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/simple_query_generator.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/sql_modules.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/sql_tables.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/storage.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/update_sql_tables.py
+https://raw.githubusercontent.com/xaltyd/crime-stats/refs/heads/main/verify_sex_data.py
