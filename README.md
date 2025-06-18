@@ -1,1 +1,24 @@
-# crime
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/checkpoint.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/color_print.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/conviction_sql.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/conviction_storage.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/date_utils.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/debug.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/distributed_scraper.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/doc-portal.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/docket.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/docket_sql.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/explore_data.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/jud_sql.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/list-py.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/llm_interface.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/llm_query_examples.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/log.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/migrate_database.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/pending_sql.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/query_generator.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/record_parser.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/sentence_sql.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/simple_query_generator.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/simplified_sql.py
+https://raw.githubusercontent.com/xaltyd/crime/refs/heads/main/simplified_storage.py
