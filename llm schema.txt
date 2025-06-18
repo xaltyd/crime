@@ -1,0 +1,163 @@
+# Connecticut Criminal Justice Database Schema
+
+## Overview
+This database contains criminal justice data from two sources:
+- Connecticut Department of Corrections (DOC) - Inmate records
+- Connecticut Judicial Branch - Court dockets, pending cases, and convictions
+
+## Tables
+
+### 1. DOC Tables
+
+#### `dept_of_correction`
+Current inmate information
+- `inmate_number` (TEXT PRIMARY KEY)
+- `inmate_name` (TEXT)
+- `date_of_birth` (TEXT)
+- `latest_admission_date` (TEXT)
+- `current_location` (TEXT) - Current facility
+- `status` (TEXT)
+- `bond_amount` (TEXT)
+- `controlling_offense` (TEXT)
+- `date_of_sentence` (TEXT)
+- `maximum_sentence` (TEXT)
+- `maximum_release_date` (TEXT)
+- `estimated_release_date` (TEXT)
+- `special_parole_end_date` (TEXT)
+- `detainer` (TEXT)
+- `last_updated` (TIMESTAMP)
+- `data_hash` (TEXT)
+
+#### `dept_of_correction_history`
+Historical changes to inmate records
+- Same fields as above plus:
+- `id` (INTEGER PRIMARY KEY)
+- `recorded_at` (TIMESTAMP) - When this version was recorded
+
+### 2. Judicial Tables
+
+#### `docket`
+Daily court docket cases
+- `id` (INTEGER PRIMARY KEY)
+- `docket_no` (TEXT UNIQUE)
+- `version` (INTEGER)
+- `last_first_name` (TEXT)
+- `represented_by` (TEXT)
+- `birth_year` (TEXT)
+- `times_on_docket` (TEXT)
+- `arresting_agency` (TEXT)
+- `arrest_date` (TEXT)
+- `companion` (TEXT) - Related case numbers
+- `docket_type` (TEXT)
+- `court` (TEXT) - Court location
+- `bond_amount` (TEXT)
+- `bond_type` (TEXT)
+- `custody` (TEXT)
+- `misc` (TEXT)
+- `purpose` (TEXT)
+- `hearing_date` (TEXT)
+- `reason` (TEXT)
+
+#### `docket_charges`
+Charges for docket cases
+- `id` (INTEGER PRIMARY KEY)
+- `case_id` (INTEGER) - References docket(id)
+- `statute` (TEXT) - Legal statute code
+- `description` (TEXT) - Charge description
+- `class` (TEXT) - Felony class (A, B, C, D, etc.)
+- `type` (TEXT)
+- `occ` (TEXT) - Occurrence count
+- `offense_date` (TEXT)
+- `plea` (TEXT)
+- `verdict_finding` (TEXT)
+
+#### `pending`
+Pending criminal cases
+- Same structure as `docket` table
+
+#### `pending_charges`
+- Same structure as `docket_charges`
+
+#### `conviction`
+Conviction records
+- `id` (INTEGER PRIMARY KEY)
+- `docket_no` (TEXT UNIQUE)
+- `version` (INTEGER)
+- `last_first_name` (TEXT)
+- `represented_by` (TEXT)
+- `birth_year` (TEXT)
+- `arresting_agency` (TEXT)
+- `arrest_date` (TEXT)
+- `sentenced_date` (TEXT)
+- `court` (TEXT)
+- `cost` (TEXT) - Total court costs
+- `paid` (TEXT) - Amount paid
+
+#### `conviction_charges`
+Charges that resulted in conviction
+- `id` (INTEGER PRIMARY KEY)
+- `case_id` (INTEGER) - References conviction(id)
+- `statute` (TEXT)
+- `description` (TEXT)
+- `class` (TEXT)
+- `type` (TEXT)
+- `occ` (TEXT)
+- `offense_date` (TEXT)
+- `plea` (TEXT)
+- `verdict_finding` (TEXT)
+- `verdict_date` (TEXT)
+- `fine` (TEXT)
+- `fees` (TEXT)
+- `charge_sequence` (INTEGER)
+
+#### `conviction_sentences`
+Sentence information for convictions
+- `id` (INTEGER PRIMARY KEY)
+- `case_id` (INTEGER) - References conviction(id)
+- `sentence_type` (TEXT) - 'OVERALL', 'MODIFIED', or 'CHARGE_SPECIFIC'
+- `sentence_text` (TEXT)
+- `sentence_date` (TEXT)
+- `is_active` (BOOLEAN)
+
+#### `charge_sentence_link`
+Links charges to their specific sentences
+- `id` (INTEGER PRIMARY KEY)
+- `charge_id` (INTEGER) - References conviction_charges(id)
+- `sentence_id` (INTEGER) - References conviction_sentences(id)
+- `sentence_details` (TEXT)
+
+### 3. Views
+
+#### `conviction_summary`
+Aggregated view of conviction data for easier querying
+- Combines conviction, charge, and sentence data
+- Includes payment status, total charges, fines, and fees
+
+## Common Query Patterns
+
+### Geographic Queries
+- Courts are location-based (e.g., "Hartford", "New Haven")
+- DOC facilities indicate current inmate location
+
+### Temporal Queries
+- `arrest_date`, `offense_date`, `sentenced_date`, `hearing_date`
+- `last_updated`, `recorded_at` for tracking changes
+
+### Charge-Related Queries
+- Statute codes (e.g., "53a-217" for gun charges)
+- Charge descriptions contain offense details
+- Class indicates severity (A felony most serious)
+
+### Status Queries
+- Pending vs convicted cases
+- Inmate status and release dates
+- Payment status for fines/fees
+
+## Important Notes for LLM
+
+1. **Gun-related charges** typically have statutes starting with "53a-216" through "53a-217"
+2. **Drug charges** often start with "21a-"
+3. **Date formats** are typically "MM/DD/YYYY" stored as TEXT
+4. **Court codes** reference specific judicial districts
+5. **Version tracking** - Higher version numbers indicate updated records
+6. **Sealed records** are excluded from the database

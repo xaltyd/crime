@@ -1,0 +1,3 @@
+for all webpages:
+need methods that can determine if something about tbe page has changed and notify me.
+for instance, maybe i can store all field names, the classes theyre found within, etc and if anything is different from what is expected then it means the page may need to be investigated
